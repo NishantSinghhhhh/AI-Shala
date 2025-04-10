@@ -1,4 +1,4 @@
-// app/auth/sign-up/page.tsx
+
 'use client'
 
 import { AuthCard } from '@/components/AuthCard'
