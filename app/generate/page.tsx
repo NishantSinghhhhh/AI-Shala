@@ -2,15 +2,17 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Menu, X, ChevronRight, Github, Search, ArrowRight, Code, Book, Loader2 } from 'lucide-react'
+import { Menu, X, ChevronRight, Github, Search, ArrowRight, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { motion } from 'framer-motion'
-import { ExternalLink } from 'lucide-react'
+import { useOpenAI } from '../../hooks/model'
+
 export default function GeneratePage() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [repoLink, setRepoLink] = useState("")
-  const [isGenerating, setIsGenerating] = useState(false)
+
+  const { data, loading: isGenerating, error, generate } = useOpenAI()
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 10)
@@ -20,14 +22,7 @@ export default function GeneratePage() {
 
   const handleSearch = () => {
     if (!repoLink) return
-    
-    setIsGenerating(true)
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Generating documentation for:', repoLink)
-      setIsGenerating(false)
-      // Redirect or show results
-    }, 2000)
+    generate(`Generate documentation for ${repoLink}`)
   }
 
   const fadeIn = {
@@ -59,26 +54,26 @@ export default function GeneratePage() {
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex space-x-8">
-            <Link 
-              href="/generate" 
+            <Link
+              href="/generate"
               className="relative font-medium text-purple-600 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-purple-600 after:content-['']"
             >
               Home
             </Link>
-            <Link 
-              href="#explain-code" 
+            <Link
+              href="#explain-code"
               className="relative font-medium text-gray-600 hover:text-purple-600 transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-purple-600 after:transition-all after:duration-300 after:content-['']"
             >
               Explaining Code
             </Link>
-            <Link 
-              href="#installation" 
+            <Link
+              href="#installation"
               className="relative font-medium text-gray-600 hover:text-purple-600 transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-purple-600 after:transition-all after:duration-300 after:content-['']"
             >
               Installation Guide
             </Link>
-            <Link 
-              href="#overview" 
+            <Link
+              href="#overview"
               className="relative font-medium text-gray-600 hover:text-purple-600 transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-purple-600 after:transition-all after:duration-300 after:content-['']"
             >
               Repository Overview
@@ -146,9 +141,9 @@ export default function GeneratePage() {
               </defs>
             </svg>
           </div>
-          
+
           <div className="container mx-auto px-4">
-            <motion.div 
+            <motion.div
               initial="hidden"
               animate="visible"
               variants={fadeIn}
@@ -158,8 +153,10 @@ export default function GeneratePage() {
                 Generate Documentation
               </div>
               <h1 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight leading-tight">
-                Transform your GitHub repository into
-                <span className="bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent"> beautiful documentation</span>
+                Transform your GitHub repository into{' '}
+                <span className="bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
+                  beautiful documentation
+                </span>
               </h1>
               <p className="text-lg text-gray-600 mb-8">
                 Enter your repository URL below and we'll automatically generate comprehensive documentation for your project.
@@ -167,7 +164,7 @@ export default function GeneratePage() {
             </motion.div>
 
             {/* Enhanced Search Bar */}
-            <motion.div 
+            <motion.div
               initial="hidden"
               animate="visible"
               variants={fadeIn}
@@ -177,7 +174,7 @@ export default function GeneratePage() {
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="relative flex-1">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Github className="h-5 w-5 text-gray-400" />
+                      <Search className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
                       type="text"
@@ -188,28 +185,32 @@ export default function GeneratePage() {
                       onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                     />
                   </div>
-                  <Button 
+                  <Button
                     onClick={handleSearch}
                     disabled={isGenerating || !repoLink}
                     className="h-12 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center gap-2 transition-all"
                   >
                     {isGenerating ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Generating...
-                      </>
+                      <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <>
-                        Generate
-                        <ArrowRight className="h-4 w-4" />
-                      </>
+                      <ArrowRight className="h-4 w-4" />
                     )}
+                    {isGenerating ? 'Generating...' : 'Generate'}
                   </Button>
                 </div>
                 <p className="text-sm text-gray-500 mt-3">
                   Recommended: Public repositories with good README and documentation files.
                 </p>
               </div>
+
+              {/* Display results */}
+              {error && <p className="text-red-500 mt-4">{error.message}</p>}
+              {data && (
+                <div className="mt-6 p-6 bg-white rounded-xl shadow">
+                  <h2 className="text-xl font-semibold mb-4">Generated Documentation</h2>
+                  <pre className="whitespace-pre-wrap text-sm text-gray-800">{data}</pre>
+                </div>
+              )}
             </motion.div>
           </div>
         </section>
