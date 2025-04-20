@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { ArrowRight, Book, Search, Github, Code, Menu, X, ChevronRight, Star, ExternalLink } from "lucide-react"
+import { ArrowRight, Book, Search, Github, Code, Menu, X, ChevronRight, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
 import { motion } from "framer-motion"
@@ -332,9 +332,9 @@ export default function HomePage() {
               <motion.h2 variants={fadeIn} className="text-3xl md:text-4xl font-bold mb-6">
                 Loved by developers worldwide
               </motion.h2>
-              <motion.p variants={fadeIn} className="text-lg text-gray-600">
-                See what teams are saying about our documentation platform and how it's transformed their workflow.
-              </motion.p>
+               <motion.p variants={fadeIn} className="text-lg text-gray-600">
+                 See what teams are saying about our documentation platform and how it&apos;s transformed their workflow.
+               </motion.p>
             </motion.div>
 
             <motion.div
@@ -380,7 +380,7 @@ export default function HomePage() {
                       />
                     ))}
                   </div>
-                  <p className="text-gray-700 mb-6 italic">"{testimonial.quote}"</p>
+                  <p className="text-gray-700 mb-6 italic">&ldquo;{testimonial.quote}&rdquo;</p>
                   <div className="flex items-center">
                     <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 mr-4">
                       {testimonial.author.charAt(0)}

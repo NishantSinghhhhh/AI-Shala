@@ -2,6 +2,23 @@
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
+interface GitHubTreeEntry {
+    path: string;
+    mode: string;
+    type: string;
+    sha: string;
+    size?: number;
+    url: string;
+  }
+
+  interface GitHubTreeResponse {
+    sha: string;
+    url: string;
+    tree: GitHubTreeEntry[];
+    truncated: boolean;
+  }
+
+  
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,   // make sure this is set in your .env
 })
@@ -44,11 +61,12 @@ export async function POST(request: Request) {
     if (!treeRes.ok) {
       throw new Error(`GitHub tree fetch failed: ${treeRes.status}`)
     }
-    const treeJson = await treeRes.json()
-    const fileList = Array.isArray(treeJson.tree)
-      ? treeJson.tree.map((e: any) => e.path).join('\n')
-      : ''
 
+    const treeJson: GitHubTreeResponse = await treeRes.json();
+
+    const fileList = Array.isArray(treeJson.tree)
+      ? treeJson.tree.map((entry: GitHubTreeEntry) => entry.path).join('\n')
+      : '';
     // 4) Build the prompt for OpenAI
     const prompt = `
 You are a technical repository analyzer. I will give you the contents of a GitHub repo; please provide a structured analysis with these sections:
@@ -126,11 +144,9 @@ ${fileList}
     // 6) Return the generated analysis
     return NextResponse.json({ text })
 
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error in /api/generate:', err)
-    return NextResponse.json(
-      { error: err.message || 'Internal server error' },
-      { status: 500 }
-    )
+    const message = err instanceof Error ? err.message : String(err)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
