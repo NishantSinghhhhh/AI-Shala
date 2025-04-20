@@ -1,32 +1,39 @@
+// hooks/model.ts
 import { useState, useCallback } from 'react'
 
-interface UseOpenAIResult {
+export interface UseOpenAIResult {
   data: string | null
   loading: boolean
   error: Error | null
-  generate: (prompt: string) => Promise<void>
+  generate: (repoLink: string) => Promise<void>
 }
 
-
 export function useOpenAI(): UseOpenAIResult {
-  const [data, setData] = useState<string | null>(null)
+  const [data, setData]     = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<Error | null>(null)
+  const [error, setError]     = useState<Error | null>(null)
 
-  const generate = useCallback(async (prompt: string) => {
+  const generate = useCallback(async (repoLink: string) => {
     setLoading(true)
     setError(null)
+    setData(null)
 
     try {
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ repoLink }),
       })
 
       if (!res.ok) {
-        const errText = await res.text()
-        throw new Error(`OpenAI request failed: ${errText}`)
+        let message: string
+        try {
+          const json = await res.json()
+          message = json.error ?? await res.text()
+        } catch {
+          message = await res.text()
+        }
+        throw new Error(`Generate request failed: ${message}`)
       }
 
       const json = await res.json()
