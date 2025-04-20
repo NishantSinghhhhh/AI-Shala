@@ -1,0 +1,16 @@
+{
+    "plugins": ["react", "react-hooks"],
+    "extends": [
+      "plugin:react/recommended",
+      "plugin:react-hooks/recommended",
+      "next/core-web-vitals"
+    ],
+    "rules": {
+      // enforce escaping HTML entities in JSX
+      "react/no-unescaped-entities": "error"
+    },
+    "settings": {
+      "react": { "version": "detect" }
+    }
+  }
+  
