@@ -166,7 +166,7 @@ export default function GeneratePage() {
                 </span>
               </h1>
               <p className="text-lg text-gray-600 mb-8">
-                Enter your repository URL below and we'll automatically generate comprehensive documentation for your project.
+                Enter your repository URL below and we will automatically generate comprehensive documentation for your project.
               </p>
             </motion.div>
 
