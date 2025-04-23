@@ -86,7 +86,7 @@ export default function HomePage() {
                 Log in
               </Button>
             </Link>
-            <Link href="/auth/sign-up">
+            <Link href="/generate">
               <Button size="sm" className="hidden md:flex bg-purple-600 hover:bg-purple-700 text-white">
                 Get Started
               </Button>

@@ -3,22 +3,21 @@ import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
 interface GitHubTreeEntry {
-    path: string;
-    mode: string;
-    type: string;
-    sha: string;
-    size?: number;
-    url: string;
-  }
+  path: string;
+  mode: string;
+  type: string;
+  sha: string;
+  size?: number;
+  url: string;
+}
 
-  interface GitHubTreeResponse {
-    sha: string;
-    url: string;
-    tree: GitHubTreeEntry[];
-    truncated: boolean;
-  }
+interface GitHubTreeResponse {
+  sha: string;
+  url: string;
+  tree: GitHubTreeEntry[];
+  truncated: boolean;
+}
 
-  
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,   // make sure this is set in your .env
 })
@@ -63,11 +62,11 @@ export async function POST(request: Request) {
     }
 
     const treeJson: GitHubTreeResponse = await treeRes.json();
-
     const fileList = Array.isArray(treeJson.tree)
       ? treeJson.tree.map((entry: GitHubTreeEntry) => entry.path).join('\n')
-      : '';
-    // 4) Build the prompt for OpenAI
+      : ''
+
+    // 4) Build the prompt for OpenAI, with added requirement:
     const prompt = `
 You are a technical repository analyzer. I will give you the contents of a GitHub repo; please provide a structured analysis with these sections:
 
@@ -94,22 +93,18 @@ You are a technical repository analyzer. I will give you the contents of a GitHu
    - Databases
    - External services
 
-5. SETUP INSTRUCTIONS:
-   - Prerequisites
-   - Installation steps
-   - Configuration
-   - Running locally
-
 6. CONTRIBUTION GUIDELINES:
    - How to contribute
    - Coding standards
    - Testing procedures
 
-7. ADDITIONAL RESOURCES:
-   - Documentation links
-   - Related projects
-   - Community channels
+8. DESCRIPTIVE SECTIONS:
+   For each of the following topics, write a detailed descriptive section of approximately 300–400 words, and include relevant code examples that we can display on the dashboard. Format your response with clear markdown headings (using ## or ### for each section and subsection) so we can easily see each heading and its corresponding content:
+   - Explaining Code: Provide an in-depth explanation of the most important code patterns and files in the repository. Include 2-3 code snippets from key files with thorough explanations of what they do and how they work. Use markdown code blocks with language specification.
+   - Installation Guide: Create a comprehensive step-by-step installation guide with all necessary commands. Include code blocks showing installation commands, configuration examples, and how to run the project locally. Format steps with clear numbering or bullet points.
+   - Repository Overview: Analyze the overall structure and organization of the repository. Include a directory structure visualization and explain the purpose of major directories and files, with code examples that show how they relate to each other.
 
+   Make sure each section is clearly demarcated with proper headings and formatting so they can be easily identified and rendered separately on the dashboard.
 ---
 
 ### README.md
