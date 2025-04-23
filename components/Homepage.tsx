@@ -86,7 +86,7 @@ export default function HomePage() {
                 Log in
               </Button>
             </Link>
-            <Link href="/auth/sign-up">
+            <Link href="/generate">
               <Button size="sm" className="hidden md:flex bg-purple-600 hover:bg-purple-700 text-white">
                 Get Started
               </Button>
@@ -184,14 +184,30 @@ export default function HomePage() {
                   interface, making it easier for developers to find what they need.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                  <Button className="bg-purple-600 hover:bg-purple-700 text-white h-12 px-6 rounded-lg text-base">
-                    Get Started
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" className="h-12 px-6 rounded-lg text-base border-gray-300 hover:bg-gray-50">
-                    <Github className="mr-2 h-5 w-5" />
-                    View on GitHub
-                  </Button>
+                <div className="mt-6 flex justify-center">
+       
+                  <Link href="/generate">
+                    <Button className="bg-purple-600 hover:bg-purple-700 text-white h-12 px-6 rounded-lg text-base">
+                      Get Started
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+                  <div className="mt-6 flex justify-center">
+                  <Link
+                    href="https://github.com/NishantSinghhhhh/AI-Shala"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button
+                      variant="outline"
+                      className="h-12 px-6 rounded-lg text-base border-gray-300 hover:bg-gray-50"
+                    >
+                      <Github className="mr-2 h-5 w-5" />
+                      View on GitHub
+                    </Button>
+                  </Link>
+                </div>
                 </div>
                 <div className="flex items-center pt-4 space-x-4">
                   <div className="flex -space-x-2">
@@ -475,9 +491,11 @@ export default function HomePage() {
                 Join hundreds of development teams who have improved their documentation experience with RepoDoc.
               </motion.p>
               <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button className="bg-white text-purple-700 hover:bg-gray-100 h-12 px-8 rounded-lg text-base">
-                  Get Started for Free
-                </Button>
+                <Link href="/generate">
+                  <Button className="bg-white text-purple-700 hover:bg-gray-100 h-12 px-8 rounded-lg text-base">
+                    Get Started for Free
+                  </Button>
+                </Link>
               </motion.div>
             </motion.div>
           </div>

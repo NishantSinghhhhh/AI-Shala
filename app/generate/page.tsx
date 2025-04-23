@@ -10,6 +10,11 @@ import {
   Search,
   ArrowRight,
   Loader2,
+  Copy,
+  Check,
+  Download,
+  BookOpen,
+  Code,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { motion } from 'framer-motion'
@@ -22,6 +27,8 @@ export default function GeneratePage() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [repoLink, setRepoLink] = useState('')
+  const [copied, setCopied] = useState(false)
+  const [activeTab, setActiveTab] = useState('preview')
 
   const { data, loading: isGenerating, error, generate } = useOpenAI()
 
@@ -36,6 +43,30 @@ export default function GeneratePage() {
     generate(`Generate documentation for ${repoLink}`)
   }
 
+  const handleCopyDocumentation = () => {
+    if (!data) return
+    navigator.clipboard.writeText(data)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleTabChange = (tab: 'preview' | 'markdown'): void => {
+    setActiveTab(tab)
+  }
+
+  const handleDownloadMarkdown = () => {
+    if (!data) return
+    const blob = new Blob([data], { type: 'text/markdown' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'repodoc-documentation.md'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
@@ -43,12 +74,13 @@ export default function GeneratePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50">
-      {/* HEADER */}
+      {/* HEADER - Same as original */}
       <header
         className={`sticky top-0 z-50 w-full transition-all duration-300 ${
           isScrolled ? 'bg-white/95 shadow-sm backdrop-blur' : 'bg-transparent'
         }`}
       >
+        {/* Header content remains the same */}
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
@@ -60,31 +92,12 @@ export default function GeneratePage() {
             </span>
           </Link>
 
-          {/* Desktop nav */}
           <nav className="hidden lg:flex space-x-8">
             <Link
               href="/generate"
               className="relative font-medium text-purple-600 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-purple-600 after:content-['']"
             >
               Home
-            </Link>
-            <Link
-              href="#explain-code"
-              className="relative font-medium text-gray-600 hover:text-purple-600 transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-purple-600 after:transition-all after:duration-300 after:content-['']"
-            >
-              Explaining Code
-            </Link>
-            <Link
-              href="#installation"
-              className="relative font-medium text-gray-600 hover:text-purple-600 transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-purple-600 after:transition-all after:duration-300 after:content-['']"
-            >
-              Installation Guide
-            </Link>
-            <Link
-              href="#overview"
-              className="relative font-medium text-gray-600 hover:text-purple-600 transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-purple-600 after:transition-all after:duration-300 after:content-['']"
-            >
-              Repository Overview
             </Link>
           </nav>
 
@@ -110,12 +123,7 @@ export default function GeneratePage() {
             <div className="container mx-auto px-4 py-4 space-y-3">
               {[
                 { href: '/', label: 'Home' },
-                { href: '/generate', label: 'Generate' },
-                { href: '#explain-code', label: 'Explaining Code' },
-                { href: '#installation', label: 'Installation Guide' },
-                { href: '#overview', label: 'Repository Overview' },
-                { href: '/auth/sign-in', label: 'Log in' },
-                { href: '/auth/sign-up', label: 'Get Started' },
+          
               ].map((link) => (
                 <Link
                   key={link.href}
@@ -146,7 +154,7 @@ export default function GeneratePage() {
               initial="hidden"
               animate="visible"
               variants={fadeIn}
-              className="max-w-3xl mx-auto text-center"
+              className="max-w-6xl mx-auto w-full text-center"
             >
               <div className="inline-block rounded-full bg-purple-100 px-4 py-1.5 text-sm font-medium text-purple-700 mb-6">
                 Generate Documentation
@@ -158,7 +166,7 @@ export default function GeneratePage() {
                 </span>
               </h1>
               <p className="text-lg text-gray-600 mb-8">
-                Enter your repository URL below and we’ll automatically generate comprehensive documentation for your project.
+                Enter your repository URL below and we will automatically generate comprehensive documentation for your project.
               </p>
             </motion.div>
 
@@ -211,48 +219,190 @@ export default function GeneratePage() {
                   <strong>Error:</strong> {error.message}
                 </div>
               )}
-              {data && (
-                <div className="mt-6 bg-white rounded-xl shadow border border-gray-100 overflow-auto">
-               <div className="px-6 py-8 w-full max-w-screen-lg mx-auto">
-                    <h2 className="text-2xl font-semibold mb-6">
-                      Generated Documentation
-                    </h2>
-                    <article className="prose prose-lg prose-purple">
-                      <ReactMarkdown
-                        components={{
-                          code({ inline, className, children, ...props }: { inline?: boolean; className?: string; children?: React.ReactNode }) {
-                            const match = /language-(\w+)/.exec(className || '')
-                            return !inline && match ? (
-                              <SyntaxHighlighter
-                                style={tomorrow}
-                                language={match[1]}
-                                PreTag="div"
-                                {...props}
-                              >
-                                {String(children).trim()}
-                              </SyntaxHighlighter>
-                            ) : (
-                              <code className={className} {...props}>
-                                {children}
-                              </code>
-                            )
-                          },
-                        }}
+              
+              {/* Loading skeleton during generation */}
+              {isGenerating && (
+                <div className="mt-6 bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
+                  <div className="p-6 border-b border-gray-100">
+                    <div className="h-6 w-2/3 bg-gray-100 rounded animate-pulse mb-3"></div>
+                    <div className="h-4 w-1/4 bg-gray-100 rounded animate-pulse"></div>
+                  </div>
+                  <div className="p-6">
+                    <div className="space-y-4">
+                      <div className="h-4 bg-gray-100 rounded animate-pulse"></div>
+                      <div className="h-4 bg-gray-100 rounded animate-pulse"></div>
+                      <div className="h-4 w-3/4 bg-gray-100 rounded animate-pulse"></div>
+                      <div className="h-20 bg-gray-100 rounded animate-pulse"></div>
+                      <div className="h-4 bg-gray-100 rounded animate-pulse"></div>
+                      <div className="h-4 w-5/6 bg-gray-100 rounded animate-pulse"></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Results display with improved UI */}
+              {data && !isGenerating && (
+               <div className="mt-6 bg-white w-[160%] mx-auto relative left-1/2 -translate-x-1/2 rounded-xl shadow border border-gray-100 overflow-hidden max-w-7xl">
+                  <div className="p-4 md:p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                      <h2 className="text-xl font-semibold">
+                        Generated Documentation
+                      </h2>
+                      <p className="text-sm text-gray-500">
+                        Documentation for {repoLink.split('/').slice(-2).join('/')}
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 self-end md:self-center">
+                      <Button
+                        onClick={handleCopyDocumentation}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-1.5 text-sm"
                       >
-                        {data}
-                      </ReactMarkdown>
-                    </article>
+                        {copied ? (
+                          <>
+                            <Check className="h-4 w-4" /> Copied
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="h-4 w-4" /> Copy
+                          </>
+                        )}
+                      </Button>
+                      
+                      <Button
+                        onClick={handleDownloadMarkdown}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-1.5 text-sm"
+                      >
+                        <Download className="h-4 w-4" /> Download
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Custom tabs implementation instead of shadcn/ui */}
+                  <div className="w-full">
+                    <div className="border-b border-gray-100">
+                      <div className="flex px-6">
+                        <button
+                          onClick={() => handleTabChange('preview')}
+                          className={`flex items-center gap-1.5 py-3 px-4 font-medium text-sm transition-colors ${
+                            activeTab === 'preview'
+                              ? 'text-purple-700 border-b-2 border-purple-600'
+                              : 'text-gray-600 hover:text-purple-700'
+                          }`}
+                        >
+                          <BookOpen className="h-4 w-4" /> Preview
+                        </button>
+                        <button
+                          onClick={() => handleTabChange('markdown')}
+                          className={`flex items-center gap-1.5 py-3 px-4 font-medium text-sm transition-colors ${
+                            activeTab === 'markdown'
+                              ? 'text-purple-700 border-b-2 border-purple-600'
+                              : 'text-gray-600 hover:text-purple-700'
+                          }`}
+                        >
+                          <Code className="h-4 w-4" /> Markdown
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Tab panel content */}
+                    <div>
+                      {/* Preview tab panel */}
+                      {activeTab === 'preview' && (
+                        <div className="px-6 py-8">
+                          <article className="prose prose-purple max-w-none w-full">
+                            <ReactMarkdown
+                              components={{
+                                code({ inline, className, children, ...props }: { inline?: boolean; className?: string; children?: React.ReactNode }) {
+                                  const match = /language-(\w+)/.exec(className || '')
+                                  return !inline && match ? (
+                                    <div className="relative group">
+                                      <button 
+                                        className="absolute top-2 right-2 p-1.5 rounded-md bg-gray-800/70 text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(String(children).trim())
+                                        }}
+                                      >
+                                        <Copy className="h-3.5 w-3.5" />
+                                      </button>
+                                      <SyntaxHighlighter
+                                        style={tomorrow}
+                                        language={match[1]}
+                                        PreTag="div"
+                                        {...props}
+                                      >
+                                        {String(children).trim()}
+                                      </SyntaxHighlighter>
+                                    </div>
+                                  ) : (
+                                    <code className={className} {...props}>
+                                      {children}
+                                    </code>
+                                  )
+                                },
+                                h1: ({ children }) => (
+                                  <h1 className="text-3xl font-bold mt-0 mb-4">{children}</h1>
+                                ),
+                                h2: ({ children }) => (
+                                  <h2 className="text-2xl font-semibold mt-8 mb-4 pb-2 border-b border-gray-200">{children}</h2>
+                                ),
+                                h3: ({ children }) => (
+                                  <h3 className="text-xl font-semibold mt-6 mb-3">{children}</h3>
+                                ),
+                                table: ({ children }) => (
+                                  <div className="overflow-x-auto">
+                                    <table className="min-w-full divide-y divide-gray-200">{children}</table>
+                                  </div>
+                                ),
+                              }}
+                            >
+                              {data}
+                            </ReactMarkdown>
+                          </article>
+                        </div>
+                      )}
+                      
+                      {/* Markdown tab panel */}
+                      {activeTab === 'markdown' && (
+                        <div className="relative">
+                          <button 
+                            className="absolute top-4 right-4 p-1.5 rounded-md bg-gray-100 hover:bg-gray-200 transition-colors z-10"
+                            onClick={() => {
+                              navigator.clipboard.writeText(data)
+                              setCopied(true)
+                              setTimeout(() => setCopied(false), 2000)
+                            }}
+                          >
+                            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                          </button>
+                          <SyntaxHighlighter
+                            language="markdown"
+                            style={tomorrow}
+                            className="rounded-none"
+                            showLineNumbers
+                          >
+                            {data}
+                          </SyntaxHighlighter>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
             </motion.div>
           </div>
         </section>
+      
       </main>
 
+      
       {/* FOOTER */}
       <footer className="bg-white border-t py-6">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center gap-2 mb-4 md:mb-0">
               <div className="h-6 w-6 rounded-full bg-purple-600 flex items-center justify-center">
